@@ -84,3 +84,22 @@ function maxtarget_set_default_options() {
         update_option('maxtarget_options', $options);
     }
 }
+
+function maxtarget_shortcode() {
+    return get_maxtarget_code();
+}
+
+add_shortcode('maxtarget', 'maxtarget_shortcode');
+
+function get_maxtarget_code(){
+    define('MT_USER','eef5986c234116a9050f2f3e553da2d91a84d219');
+    require_once('maxtarget_api.php');
+    $o['charset'] = 'UTF-8'; // кодировка сайта
+    $maxtarget = new MaxtargetClient($o);
+    unset($o);
+    return $maxtarget->show_banner('300x250'); //размер баннера
+
+    //    return <<<HTML
+//<b><i>Hello, World!</i></b>
+//HTML;
+}
