@@ -2,7 +2,7 @@
 /*
 Plugin Name: MaxTarget
 Plugin URI: http://maxtarget.ru/
-Description: MaxTarget — demo plugin for WordPress.
+Description: maxTarget — система монетизации
 Version: 1.0.0
 Author: maxTarget Team
 Author URI: http://maxtarget.ru
