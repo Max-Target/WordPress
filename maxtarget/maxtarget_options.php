@@ -104,11 +104,10 @@ add_shortcode('maxtarget', 'maxtarget_shortcode');
 
 function get_maxtarget_code() {
     $options = get_option('maxtarget_options');
-    $key = $options['maxtarget_key'];
-    define('MT_USER', $key);
+    $o['charset'] = $options['maxtarget_encode'];
+    $o['key'] = $options['maxtarget_key'];
     require_once('maxtarget_api.php');
-    $o['charset'] = $options['maxtarget_encode']; // кодировка сайта
     $maxtarget = new MaxtargetClient($o);
     unset($o);
-    return $maxtarget->show_banner('300x250'); //размер баннера
+    return $maxtarget->show_banner('240x400');
 }
