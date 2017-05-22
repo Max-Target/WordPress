@@ -4,7 +4,7 @@ Plugin Name: MaxTarget
 Plugin URI: http://maxtarget.ru/
 Description: MaxTarget — demo plugin for WordPress.
 Version: 1.0.0
-Author: maxTarget
+Author: maxTarget Team
 Author URI: http://maxtarget.ru
 */
 
@@ -43,11 +43,10 @@ if (is_admin()) {
         //выполняем код с нашими настройками
         //например, результат сохранения настроект, будет операция слияния строк первого и второго в одну
         $options = $_REQUEST['maxtarget_options'];
-        $options['maxtarget_result'] = intval($options['maxtarget_first']) + intval($options['maxtarget_second']);
         update_option('maxtarget_options', $options);
     } else {
         $options = get_option('maxtarget_options');
     }
-    $my_settings_page = new maxtargetSettingsPage();
+    $my_settings_page = new maxTargetSettingsPage();
 }
 
