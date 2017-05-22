@@ -2,7 +2,7 @@
 Contributors: MaxTarget Team
 Tags: монетизация
 Requires at least: 3.0.1
-Tested up to: 4.7.4
+Tested up to: 4.7.5
 Stable tag: 1.0.0
 
 maxTarget — система монетизации
