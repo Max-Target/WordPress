@@ -31,7 +31,7 @@ class Options {
 
 class Settings extends Options {
     var $defaults = array(
-        'img_dir' => '/../banners/',
+        'img_dir' => '/banners/',
         'img_url' => '/banners/',
         'img_ext' => '.png',
         'test_count' => 4,
