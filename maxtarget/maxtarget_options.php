@@ -1,31 +1,30 @@
 <?php
 
-class maxTargetSettingsPage {
+class MxTrSettingsPage {
     public $options;
     public $settings_page_name = 'maxtarget_settings';
 
     public function __construct() {
-        add_action('admin_menu', array($this, 'add_plugin_page'));
-        add_action('admin_init', array($this, 'page_init'));
-        add_action('admin_enqueue_scripts', array($this, 'mt_admin_styles'));
+        add_action('admin_menu', array($this, 'mxtr_add_plugin_page'));
+        add_action('admin_init', array($this, 'mxtr_page_init'));
+        add_action('admin_enqueue_scripts', array($this, 'mxtr_admin_styles'));
         $this->options = get_option('maxtarget_options');
     }
 
-    public function add_plugin_page() {
+    public function mxtr_add_plugin_page() {
         add_options_page('MaxTarget Settings', 'MaxTarget', 'manage_options', $this->settings_page_name, array(
             $this,
-            'maxtarget_create_admin_page'));
+            'mxtr_create_admin_page'));
     }
 
 
-    public function mt_admin_styles() {
-        wp_register_style('mt_admin_menu_styles', untrailingslashit(plugins_url('/', __FILE__)) . '/assets/css/maxtarget.css', array());
-        wp_enqueue_style('mt_admin_menu_styles');
+    public function mxtr_admin_styles() {
+        wp_register_style('mxtr_admin_menu_styles', untrailingslashit(plugins_url('/', __FILE__)) . '/assets/css/maxtarget.css', array());
+        wp_enqueue_style('mxtr_admin_menu_styles');
     }
 
-    public function maxtarget_create_admin_page() {
+    public function mxtr_create_admin_page() {
         $this->options = get_option('maxtarget_options');
-        $items = array('240x400', '300x250', '728x90');
         ?>
         <div class="wrap">
             <div id="wrapper">
@@ -158,33 +157,33 @@ class maxTargetSettingsPage {
         <?php
     }
 
-    public function page_init() {
-        register_setting('maxtarget_option_group', 'maxtarget_options', array($this, 'sanitize'));
+    public function mxtr_page_init() {
+        register_setting('maxtarget_option_group', 'maxtarget_options', array($this, 'mxtr_sanitize'));
 
-        add_settings_section('setting_section_id', '', array($this, 'print_section_info'), $this->settings_page_name);
+        add_settings_section('setting_section_id', '', array($this, 'mxtr_print_section_info'), $this->settings_page_name);
 
         add_settings_field('maxtarget_key', 'Ключ', array(
             $this,
-            'maxtarget_key_callback'), $this->settings_page_name, 'setting_section_id');
+            'mxtr_key_callback'), $this->settings_page_name, 'setting_section_id');
 
         add_settings_field('maxtarget_encode', 'Кодировка сайта', array(
             $this,
-            'maxtarget_encode_callback'), $this->settings_page_name, 'setting_section_id');
+            'mxtr_encode_callback'), $this->settings_page_name, 'setting_section_id');
 
         add_settings_field('maxtarget_size', 'Размер баннера по умолчанию', array(
             $this,
-            'maxtarget_size_callback'), $this->settings_page_name, 'setting_section_id');
+            'mxtr_size_callback'), $this->settings_page_name, 'setting_section_id');
 
         add_settings_field('maxtarget_user_code', 'Код рекламной сети', array(
             $this,
-            'maxtarget_user_code_callback'), $this->settings_page_name, 'setting_section_id');
+            'mxtr_user_code_callback'), $this->settings_page_name, 'setting_section_id');
     }
 
-    public function sanitize($input) {
+    public function mxtr_sanitize($input) {
         $new_input = array();
 
         if (isset($input['maxtarget_key']))
-            $new_input['maxtarget_key'] = $input['maxtarget_key'];
+            $new_input['maxtarget_key'] = esc_attr($input['maxtarget_key']);
 
         if (isset($input['maxtarget_encode']))
             $new_input['maxtarget_encode'] = $input['maxtarget_encode'];
@@ -202,22 +201,22 @@ class maxTargetSettingsPage {
             $new_input['maxtarget_multi_site'] = $input['maxtarget_multi_site'];
 
         if (isset($input['maxtarget_user_code']))
-            $new_input['maxtarget_user_code'] = $input['maxtarget_user_code'];
+            $new_input['maxtarget_user_code'] = esc_js($input['maxtarget_user_code']);
 
         if (isset($input['maxtarget_custom']))
-            $new_input['maxtarget_custom'] = $input['maxtarget_custom'];
+            $new_input['maxtarget_custom'] = esc_attr($input['maxtarget_custom']);
 
         return $new_input;
     }
 
-    public function print_section_info() {
+    public function mxtr_print_section_info() {
     }
 
-    public function maxtarget_key_callback() {
+    public function mxtr_key_callback() {
         printf('<input type="text" id="maxtarget_key" name="maxtarget_options[maxtarget_key]" size="45" value="%s" title="Введите ключ"/>', isset($this->options['maxtarget_key']) ? esc_attr($this->options['maxtarget_key']) : '');
     }
 
-    public function maxtarget_encode_callback() {
+    public function mxtr_encode_callback() {
         $options = get_option('maxtarget_options');
         $items = array('UTF-8', 'KOI8-R', 'Windows-1251');
         echo "<select id='maxtarget_encode' name='maxtarget_options[maxtarget_encode]'>";
@@ -228,7 +227,7 @@ class maxTargetSettingsPage {
         echo "</select>";
     }
 
-    public function maxtarget_size_callback() {
+    public function mxtr_size_callback() {
         $options = get_option('maxtarget_options');
         $items = array('240x400', '300x250', '728x90');
         echo "<select id='maxtarget_size' name='maxtarget_options[maxtarget_size]'>";
@@ -239,14 +238,13 @@ class maxTargetSettingsPage {
         echo "</select>";
     }
 
-    public function maxtarget_user_code_callback() {
+    public function mxtr_user_code_callback() {
         $desc = 'Вставьте код рекламной сети, который будет демонстрироваться в отсутствии рекламы MaxTarget. Это необходимо для сохранения вашего заработка: если в данный момент нет заявок на размещение баннеров - вы продолжите зарабатывать на текущих рекламных сетях. Поддерживаются все виды рекламных сетей: рекламная сеть Яндекса, Google AdSence, тизерные и RTB сети.';
         printf('<textarea type="text" id="maxtarget_user_code" name="maxtarget_options[maxtarget_user_code]" rows="6" cols="45" placeholder="Скопируйте сюда js код вашей рекламной сети" title="%s">%s</textarea>', $desc, isset($this->options['maxtarget_user_code']) ? esc_attr($this->options['maxtarget_user_code']) : '');
     }
-
 }
 
-function maxtarget_set_default_options() {
+function mxtr_set_default_options() {
     $options = get_option('maxtarget_options');
     if (is_bool($options)) {
         $options = array();
@@ -263,28 +261,28 @@ function maxtarget_set_default_options() {
     }
 }
 
-function maxtarget_shortcode() {
-    return get_maxtarget_code();
+function mxtr_shortcode() {
+    return mxtr_get_code();
 }
 
-function maxtarget_shortcode240x400() {
-    return get_maxtarget_code('240x400');
+function mxtr_shortcode1() {
+    return mxtr_get_code('240x400');
 }
 
-function maxtarget_shortcode300x250() {
-    return get_maxtarget_code('300x250');
+function mxtr_shortcode2() {
+    return mxtr_get_code('300x250');
 }
 
-function maxtarget_shortcode728x90() {
-    return get_maxtarget_code('728x90');
+function mxtr_shortcode3() {
+    return mxtr_get_code('728x90');
 }
 
-add_shortcode('maxtarget', 'maxtarget_shortcode');
-add_shortcode('maxtarget240x400', 'maxtarget_shortcode240x400');
-add_shortcode('maxtarget300x250', 'maxtarget_shortcode300x250');
-add_shortcode('maxtarget728x90', 'maxtarget_shortcode728x90');
+add_shortcode('maxtarget', 'mxtr_shortcode');
+add_shortcode('maxtarget240x400', 'mxtr_shortcode1');
+add_shortcode('maxtarget300x250', 'mxtr_shortcode2');
+add_shortcode('maxtarget728x90', 'mxtr_shortcode3');
 
-function get_maxtarget_code($size = '') {
+function mxtr_get_code($size = '') {
     $options = get_option('maxtarget_options');
 
     $o['key'] = $options['maxtarget_key'];
@@ -317,29 +315,29 @@ function get_maxtarget_code($size = '') {
     }
 
     require_once('maxtarget_api.php');
-    $maxtarget = new MaxtargetClient($o);
+    $maxtarget = new MxTrClient($o);
     unset($o);
-    return $maxtarget->show_banner($size, $options['maxtarget_user_code']);
+    return $maxtarget->mxtr_show_banner($size, wp_specialchars_decode($options['maxtarget_user_code']));
 }
 
-add_action('admin_menu', 'maxtarget_admin_actions');
+add_action('admin_menu', 'mxtr_admin_actions');
 
-function maxtarget_admin_actions() {
+function mxtr_admin_actions() {
     if (current_user_can('manage_options')) {
         if (function_exists('add_meta_box')) {
-            add_menu_page('MaxTarget Settings', 'MaxTarget', 'manage_options', 'maxtarget_settings', 'maxtarget_custom_menu_page', null, 100);
+            add_menu_page('MaxTarget Settings', 'MaxTarget', 'manage_options', 'maxtarget_settings', 'mxtr_custom_menu_page', null, 100);
         }
     }
 }
 
-function maxtarget_custom_menu_page() {
-    $maxtarget_settings_page = new maxTargetSettingsPage();
-    if (!isset($maxtarget_settings_page)) {
+function mxtr_custom_menu_page() {
+    $mxtr_settings_page = new MxTrSettingsPage();
+    if (!isset($mxtr_settings_page)) {
         wp_die(__('Plugin maxTarget has been installed incorrectly.'));
     }
     if (function_exists('add_plugins_page')) {
         add_plugins_page('maxTarget Settings', 'MaxTarget', 'manage_options', 'maxtarget_settings', array(
-            &$maxtarget_settings_page,
-            'maxtarget_create_admin_page'));
+            &$mxtr_settings_page,
+            'mxtr_create_admin_page'));
     }
 }

@@ -3,7 +3,7 @@ define('MAXTARGET_COMPILED', 1);
 ?>
 <?php
 
-class Options {
+class MxTrOptions {
     var $options = null;
 
     function __construct($options = array()) {
@@ -29,7 +29,7 @@ class Options {
 ?>
 <?php
 
-class Settings extends Options {
+class MxTrSettings extends MxTrOptions {
     var $defaults = array(
         'img_dir' => '/banners/',
         'img_url' => '/banners/',
@@ -50,7 +50,7 @@ class Settings extends Options {
         'server' => 'cdn.maxtarget.ru',
         'charset' => 'DEFAULT');
 
-    function encode_path($path) {
+    function mxtr_encode_path($path) {
         $path = rawurldecode($path);
         $encoded_path = array_map('urlencode', explode('/', $path));
         return implode('/', $encoded_path);
@@ -74,7 +74,7 @@ class Settings extends Options {
             $this->request_uri = preg_replace('{/+}', '/', $this->request_uri);
         }
 
-        $this->request_uri = $this->encode_path($this->request_uri);
+        $this->request_uri = $this->mxtr_encode_path($this->request_uri);
 
         if ((isset($_SERVER['HTTP_TRUSTLINK']) && $_SERVER['HTTP_TRUSTLINK'] == MT_USER) || (isset($_GET['mt_test']) && $_GET['mt_test'] == MT_USER)) {
             $this->test = true;
@@ -88,29 +88,29 @@ class Settings extends Options {
 ?>
 <?php
 
-class MtBasic {
+class MxTrBasic {
 
     var $options = null;
 
     function __construct(&$options = null) {
         $this->options = $options;
         if (empty($this->options))
-            $this->options = new Settings();
+            $this->options = new MxTrSettings();
     }
 }
 ?>
 <?php
 
-class Templater extends MtBasic {
+class MxTrTemplater extends MxTrBasic {
     var $templates = array();
     var $reserved = array('template');
     var $img_template = '<a href="%url%"><image src="%image_url%" /></a>';
 
-    function load_templates($tpl = array()) {
+    function mxtr_load_templates($tpl = array()) {
         $this->templates = $tpl;
     }
 
-    function render($data) {
+    function mxtr_render($data) {
         $vars = array();
         $vals = array();
         $default_template = $this->options->mt->storage->size_default_template;
@@ -130,11 +130,11 @@ class Templater extends MtBasic {
                         }
                         elseif ($k == 'image') {
                             $vars[] = '%image_url%';
-                            $vals[] = $this->options->mt->banner->load_banner($v);
+                            $vals[] = $this->options->mt->banner->mxtr_load_banner($v);
                         }
                         elseif ($k == 'favicon_url') {
                             $vars[] = '%favicon_url%';
-                            $vals[] = $this->options->mt->icon->load_icon($v);
+                            $vals[] = $this->options->mt->icon->mxtr_load_icon($v);
                         }
                         else {
                             $vars[] = '%' . $k . '%';
@@ -160,13 +160,13 @@ class Templater extends MtBasic {
 ?>
 <?php
 
-class Renderer extends MtBasic {
+class MxTrRenderer extends MxTrBasic {
     var $templater = null;
     var $widget_count = 1;
 
-    function render($storage, $errors = null, $stat = null, $user_code = null) {
+    function mxtr_render($storage, $errors = null, $stat = null, $user_code = null) {
         //TODO
-        //$banners = $this->mt_banners_page[$size];
+        //$banners = $this->mxtr_banners_page[$size];
 
         $adv_size = 'adv' . $storage->size;
         $user_code_key = 'adv' . $storage->size . '_user_code';
@@ -180,12 +180,12 @@ class Renderer extends MtBasic {
 
         //TODO
         if (false && isset($banners) && count($banners) > 0) {
-            $banner_url = $this->fetch_banner($banners[0]['image']);
+            $banner_url = $this->mxtr_fetch_banner($banners[0]['image']);
             if ($banner_url) {
                 $result .= '<img src = "' . $banner_url . '" />';
             }
             else {
-                $this->raise_error("Can't load banner");
+                $this->mxtr_raise_error("Can't load banner");
             }
         }
 
@@ -205,23 +205,23 @@ class Renderer extends MtBasic {
             $result .= 'charset=' . $this->options->charset . "\n";
             $result .= 'is_static=' . $this->options->is_static . "\n";
             $result .= 'multi_site=' . $this->options->multi_site . "\n";
-            $info = $storage->info();
+            $info = $storage->mxtr_info();
             $result .= 'file change date=' . $info['date'] . "\n";
             $result .= 'file_size=' . $info['size'] . "\n";
             $result .= 'banner_size =' . $storage->size . "\n";
             //$result .= 'c=' . count($banners) . "\n";
-            //$result .= 'total=' . $this->mt_banners_count . "\n";
+            //$result .= 'total=' . $this->mxtr_banners_count . "\n";
             $result .= "-->\n";
         }
 
-        $res_banner = $this->templater->render($storage->page_data);
+        $res_banner = $this->templater->mxtr_render($storage->page_data);
         if (empty($res_banner))
             $res_banner = $user_code;
         if (empty($res_banner))
             $res_banner = $storage->config->$user_code_key;
 
         $result .= $res_banner;
-        $result .= $this->widget_tag($storage);
+        $result .= $this->mxtr_widget_tag($storage);
 
         if ($this->options->test && !$this->options->isrobot)
             $result = '<noindex>' . $result . '</noindex>';
@@ -231,7 +231,7 @@ class Renderer extends MtBasic {
         return $result;
     }
 
-    function render_error($errors = null) {
+    function mxtr_render_error($errors = null) {
         $result = '';
         if (!empty($errors) && $this->options->debug) {
             $result .= "\n<!-- ";
@@ -241,7 +241,7 @@ class Renderer extends MtBasic {
         return $result;
     }
 
-    function widget_tag($storage) {
+    function mxtr_widget_tag($storage) {
         if ($this->widget_count < 1)
             return '';
         $this->widget_count = $this->widget_count - 1;
@@ -261,9 +261,9 @@ class Renderer extends MtBasic {
 ?>
 <?php
 
-class Stat extends MtBasic {
+class MxTrStat extends MxTrBasic {
 
-    function get_stat() {
+    function mxtr_get_stat() {
         $e = array();
         $i = array();
         foreach (get_loaded_extensions() as $i => $ext)
@@ -276,7 +276,7 @@ class Stat extends MtBasic {
 ?>
 <?php
 
-class Serializer extends MtBasic {
+class MxTrSerializer extends MxTrBasic {
     var $data = null;
     var $config = array();
     var $page_data = array();
@@ -290,65 +290,65 @@ class Serializer extends MtBasic {
             $this->options->storage = array('file_path' => dirname(__FILE__) . '/mt.data');
     }
 
-    function info() {
+    function mxtr_info() {
         $date = gmstrftime("%d.%m.%Y %H:%M:%S", filectime($this->options->storage['file_path']));
         return array('size' => $this->fsize, 'date' => $date);
     }
 
-    function extract_options() {
-        $this->config = new Options($this->get_section('config'));
+    function mxtr_extract_options() {
+        $this->config = new MxTrOptions($this->mxtr_get_section('config'));
     }
 
-    function load_data() {
+    function mxtr_load_data() {
         if (filemtime($this->options->storage['file_path']) < (time() - $this->options->cache_lifetime) || (filemtime($this->options->storage['file_path']) < (time() - $this->options->cache_reloadtime) && filesize($this->options->storage['file_path']) == 0)) {
             $this->data = null;
             $this->fsize = 0;
         }
         else {
-            $data = $this->read_data($this->options->storage['file_path']);
+            $data = $this->mxtr_read_data($this->options->storage['file_path']);
             $this->fsize = strlen($data);
             $this->data = unserialize($data);
-            $this->extract_options();
+            $this->mxtr_extract_options();
         }
     }
 
-    function assign_data($data, $size = 0) {
+    function mxtr_assign_data($data, $size = 0) {
         $this->data = $data;
         $this->fsize = $size;
-        $this->extract_options();
+        $this->mxtr_extract_options();
     }
 
-    function has_data() {
+    function mxtr_has_data() {
         //Trying to load data
-        if (empty($this->data) && $this->setup_datafile($this->options->storage['file_path']))
-            $this->load_data();
+        if (empty($this->data) && $this->mxtr_setup_datafile($this->options->storage['file_path']))
+            $this->mxtr_load_data();
 
         return !empty($this->data);
     }
 
-    function save_data($data = null) {
+    function mxtr_save_data($data = null) {
         if (!empty($data))
-            $this->write_data($this->options->storage['file_path'], serialize($data));
+            $this->mxtr_write_data($this->options->storage['file_path'], serialize($data));
     }
 
-    function save_raw_data($data = null) {
+    function mxtr_save_raw_data($data = null) {
         if (!empty($data))
-            $this->write_data($this->options->storage['file_path'], $data);
+            $this->mxtr_write_data($this->options->storage['file_path'], $data);
     }
 
-    function set_size($size) {
+    function mxtr_set_size($size) {
         $this->size = $size;
-        $data = $this->get_section($this->size, $this->get_section('data'));
+        $data = $this->mxtr_get_section($this->size, $this->mxtr_get_section('data'));
         if (array_key_exists('template', $data)) {
             $this->size_default_template = $data['template'];
         }
     }
 
-    function get_page_data($uri = '/') {
-        return $this->get_section($uri, $this->get_section($this->size, $this->get_section('data')));
+    function mxtr_get_page_data($uri = '/') {
+        return $this->mxtr_get_section($uri, $this->mxtr_get_section($this->size, $this->mxtr_get_section('data')));
     }
 
-    function get_section($section, $data = null) {
+    function mxtr_get_section($section, $data = null) {
         if (empty($data))
             $data = $this->data;
         if (!empty($data) && !empty($section) && is_array($data) && isset($data[$section]))
@@ -357,13 +357,13 @@ class Serializer extends MtBasic {
             return array();
     }
 
-    function switch_page($size, $uri = '/') {
-        $this->set_size($size);
-        $this->page_data = $this->get_page_data($uri);
+    function mxtr_switch_page($size, $uri = '/') {
+        $this->mxtr_set_size($size);
+        $this->page_data = $this->mxtr_get_page_data($uri);
     }
 
 
-    function setup_datafile($filename) {
+    function mxtr_setup_datafile($filename) {
         if (!is_file($filename)) {
             if (@touch($filename, time() - $this->options->cache_lifetime)) {
                 @chmod($filename, 0666);
@@ -379,7 +379,7 @@ class Serializer extends MtBasic {
         return true;
     }
 
-    function read_data($filename) {
+    function mxtr_read_data($filename) {
         $fp = @fopen($filename, 'rb');
         @flock($fp, LOCK_SH);
         if ($fp) {
@@ -411,7 +411,7 @@ class Serializer extends MtBasic {
         throw new Exception("Can't get data from the file: " . $filename);
     }
 
-    function write_data($filename, $data) {
+    function mxtr_write_data($filename, $data) {
         $fp = @fopen($filename, 'wb');
         if ($fp) {
             @flock($fp, LOCK_EX);
@@ -421,7 +421,7 @@ class Serializer extends MtBasic {
             @flock($fp, LOCK_UN);
             @fclose($fp);
 
-            if (md5($this->read_data($filename)) != md5($data))
+            if (md5($this->mxtr_read_data($filename)) != md5($data))
                 throw new Exception("Integrity was violated while writing to file: " . $filename);
 
             return true;
@@ -434,88 +434,88 @@ class Serializer extends MtBasic {
 ?>
 <?php
 
-class Banner extends MtBasic {
+class MxTrBanner extends MxTrBasic {
 
-    function file_name($name) {
+    function mxtr_file_name($name) {
         return $name . $this->options->img_ext;
     }
 
-    function web_image_url($name) {
-        return $this->options->img_url . $this->file_name($name);
+    function mxtr_web_image_url($name) {
+        return $this->options->img_url . $this->mxtr_file_name($name);
     }
 
-    function image_dir() {
+    function mxtr_image_dir() {
         return $this->options->main_dir . $this->options->img_dir;
     }
 
-    function image_path($name) {
-        return $this->image_dir() . $this->file_name($name);
+    function mxtr_image_path($name) {
+        return $this->mxtr_image_dir() . $this->mxtr_file_name($name);
     }
 
-    function load_banner($name) {
-        if (!file_exists($this->image_path($name))) {
-            $data = $this->options->mt->network->download_banner($this->file_name($name));
+    function mxtr_load_banner($name) {
+        if (!file_exists($this->mxtr_image_path($name))) {
+            $data = $this->options->mt->network->mxtr_download_banner($this->mxtr_file_name($name));
             if (!empty($data))
-                $this->options->mt->storage->write_data($this->image_path($name), $data);
+                $this->options->mt->storage->mxtr_write_data($this->mxtr_image_path($name), $data);
 
         }
-        return $this->web_image_url($name);
+        return $this->mxtr_web_image_url($name);
     }
 
-    function check_image_dir() {
-        if (!file_exists($this->image_dir()))
-            mkdir($this->image_dir(), 0777, true);
+    function mxtr_check_image_dir() {
+        if (!file_exists($this->mxtr_image_dir()))
+            mkdir($this->mxtr_image_dir(), 0777, true);
     }
 }
 ?>
 <?php
 
-class Icon extends MtBasic {
+class MxTrIcon extends MxTrBasic {
 
-    function file_name($name) {
+    function mxtr_file_name($name) {
         return $name;
     }
 
-    function web_image_url($name) {
-        return $this->options->img_url . $this->file_name($name);
+    function mxtr_web_image_url($name) {
+        return $this->options->img_url . $this->mxtr_file_name($name);
     }
 
-    function image_dir() {
+    function mxtr_image_dir() {
         return $this->options->main_dir . $this->options->img_dir;
     }
 
-    function image_path($name) {
-        return $this->image_dir() . $this->file_name($name);
+    function mxtr_image_path($name) {
+        return $this->mxtr_image_dir() . $this->mxtr_file_name($name);
     }
 
-    function load_icon($name) {
-        if (!file_exists($this->image_path($name))) {
-            $data = $this->options->mt->network->download_icon($this->file_name($name));
+    function mxtr_load_icon($name) {
+        if (!file_exists($this->mxtr_image_path($name))) {
+            $data = $this->options->mt->network->mxtr_download_icon($this->mxtr_file_name($name));
             if (!empty($data))
-                $this->options->mt->storage->write_data($this->image_path($name), $data);
+                $this->options->mt->storage->mxtr_write_data($this->mxtr_image_path($name), $data);
 
         }
-        return $this->web_image_url($name);
+        return $this->mxtr_web_image_url($name);
     }
 
-    function check_image_dir() {
-        if (!file_exists($this->image_dir()))
-            mkdir($this->image_dir(), 0777, true);
+    function mxtr_check_image_dir() {
+        if (!file_exists($this->mxtr_image_dir()))
+            mkdir($this->mxtr_image_dir(), 0777, true);
     }
 
 }
 ?>
 <?php
 
-class Fetcher extends MtBasic {
+class MxTrFetcher extends MxTrBasic {
 
-    function setup_headers() {
+    function mxtr_setup_headers() {
         $h['X-MT-VER'] = $this->options->version;
         $h['X-MT-LANGVER'] = "PHP/" . phpversion();
         return $h;
     }
 
-    function fetch_remote_file($host, $path) {
+    function mxtr_fetch_remote_file($host, $path) {
 
         $user_agent = 'Maxtarget Client PHP ' . $this->options->version . '/' . phpversion();
 
@@ -527,7 +527,7 @@ class Fetcher extends MtBasic {
             if ($data = file_get_contents('http://' . $host . $path))
                 return $data;
         }
-        elseif ($this->options->mt_fetch_remote_type == 'curl' || ($this->options->mt_fetch_remote_type == null && function_exists('curl_init'))) {
+        elseif ($this->options->fetch_remote_type == 'curl' || ($this->options->fetch_remote_type == null && function_exists('curl_init'))) {
             if ($ch = @curl_init()) {
                 @curl_setopt($ch, CURLOPT_URL, 'http://' . $host . $path);
                 @curl_setopt($ch, CURLOPT_HEADER, false);
@@ -563,13 +563,13 @@ class Fetcher extends MtBasic {
         throw new Exception("Can't connect to server: " . $host . $path);
     }
 
-    function download_data() {
+    function mxtr_download_data() {
         if ($this->options->fetch_remote_type == 'local')
             return file_get_contents($this->options->local_datafile_path);
 
         $path = '/' . $this->options->key . '/' . strtolower($this->options->host) . '/' . strtoupper($this->options->charset);
 
-        if ($data = $this->fetch_remote_file($this->options->server, $path)) {
+        if ($data = $this->mxtr_fetch_remote_file($this->options->server, $path)) {
             if (substr($data, 0, 12) == 'FATAL ERROR:')
                 throw new Exception($data);
             else
@@ -579,13 +579,13 @@ class Fetcher extends MtBasic {
             throw new Exception('Can not download datafile');
     }
 
-    function download_banner($file_name) {
+    function mxtr_download_banner($file_name) {
         if ($this->options->fetch_remote_type == 'local')
             return file_get_contents($this->options->local_banner_folder . $file_name);
 
         $path = '/' . $this->options->key . '/' . strtolower($this->options->host) . '/' . $this->options->server_burl . '/' . $file_name;
 
-        if ($data = $this->fetch_remote_file($this->options->server, $path)) {
+        if ($data = $this->mxtr_fetch_remote_file($this->options->server, $path)) {
             if (substr($data, 0, 12) == 'FATAL ERROR:')
                 throw new Exception($data);
             else
@@ -595,13 +595,13 @@ class Fetcher extends MtBasic {
             throw new Exception('Can not download banner' . $file_name);
     }
 
-    function download_icon($file_name) {
+    function mxt_download_icon($file_name) {
         if ($this->options->fetch_remote_type == 'local')
             return file_get_contents($this->options->local_icon_folder . $file_name);
 
         $path = $this->options->server_furl . $file_name;
 
-        if ($data = $this->fetch_remote_file($this->options->server, $path)) {
+        if ($data = $this->mxtr_fetch_remote_file($this->options->server, $path)) {
             if (substr($data, 0, 12) == 'FATAL ERROR:')
                 throw new Exception($data);
             else
@@ -614,7 +614,7 @@ class Fetcher extends MtBasic {
 ?>
 <?php
 
-class MaxtargetCore {
+class MxTrCore {
     var $settings = null;
     var $renderer = null;
     var $stat = null;
@@ -629,37 +629,37 @@ class MaxtargetCore {
         $this->settings->version = '1.0.9';
     }
 
-    function error($err) {
+    function mxtr_error($err) {
         $this->errors[] = $err;
     }
 
-    function has_errors() {
+    function mxtr_has_errors() {
         return count($this->errors) > 0;
     }
 
-    function show_banner($size = null, $user_code = null) {
+    function mxtr_show_banner($size = null, $user_code = null) {
         try {
             if (empty($this->settings->key))
                 throw new Exception("Key is not defined.");
 
-            if (!$this->storage->has_data()) {
-                $data = $this->network->download_data();
-                $this->storage->save_raw_data($data);
-                $this->storage->assign_data(unserialize($data), strlen($data));
+            if (!$this->storage->mxtr_has_data()) {
+                $data = $this->network->mxtr_download_data();
+                $this->storage->mxtr_save_raw_data($data);
+                $this->storage->mxtr_assign_data(unserialize($data), strlen($data));
             }
 
-            $this->renderer->templater->load_templates($this->storage->config->templates);
-            $this->storage->switch_page($size, $this->settings->request_uri);
-            $this->banner->check_image_dir();
+            $this->renderer->templater->mxtr_load_templates($this->storage->config->templates);
+            $this->storage->mxtr_switch_page($size, $this->settings->request_uri);
+            $this->banner->mxtr_check_image_dir();
 
         } catch (Exception $e) {
-            $this->error($e->getMessage());
+            $this->mxtr_error($e->getMessage());
         }
 
         try {
-            return $this->renderer->render($this->storage, $this->errors, $this->stat->get_stat(), $user_code);
+            return $this->renderer->mxtr_render($this->storage, $this->errors, $this->stat->mxtr_get_stat(), $user_code);
         } catch (Exception $e) {
-            return $this->renderer->render_error(array($e->getMessage()));
+            return $this->renderer->mxtr_render_error(array($e->getMessage()));
         }
     }
 }
@@ -680,21 +680,21 @@ if (!defined('MAXTARGET_COMPILED')) {
     require_once 'MaxtargetCore.php';
 }
 
-class MaxtargetClient {
+class MxTrClient {
     var $maxtarget = null;
 
     function __construct($options = null) {
-        $settings = new Settings($options);
+        $settings = new MxTrSettings($options);
         $settings->main_dir = dirname(__FILE__);
-        $this->maxtarget = new MaxtargetCore($settings);
+        $this->maxtarget = new MxTrCore($settings);
         $settings->mt = $this->maxtarget;
-        $this->maxtarget->stat = new Stat($settings);
-        $this->maxtarget->renderer = new Renderer($settings);
-        $this->maxtarget->renderer->templater = new Templater($settings);
-        $this->maxtarget->storage = new Serializer($settings);
-        $this->maxtarget->banner = new Banner($settings);
-        $this->maxtarget->icon = new Icon($settings);
-        $this->maxtarget->network = new Fetcher($settings);
+        $this->maxtarget->stat = new MxTrStat($settings);
+        $this->maxtarget->renderer = new MxTrRenderer($settings);
+        $this->maxtarget->renderer->templater = new MxTrTemplater($settings);
+        $this->maxtarget->storage = new MxTrSerializer($settings);
+        $this->maxtarget->banner = new MxTrBanner($settings);
+        $this->maxtarget->icon = new MxTrIcon($settings);
+        $this->maxtarget->network = new MxTrFetcher($settings);
     }
 
     //Proxying calls

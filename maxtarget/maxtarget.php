@@ -11,9 +11,9 @@ Author URI: http://maxtarget.ru
 include 'maxtarget_options.php';
 
 //добавляем ссылку для настроек на странице выбора плагина
-add_filter('plugin_action_links', 'maxtarget_plugin_action_links', 10, 2);
+add_filter('plugin_action_links', 'mxtr_plugin_action_links', 10, 2);
 
-function maxtarget_plugin_action_links($actions, $plugin_file) {
+function mxtr_plugin_action_links($actions, $plugin_file) {
     if (false === strpos($plugin_file, basename(__FILE__)))
         return $actions;
     $settings_link = '<a href="options-general.php?page=maxtarget_settings">Настройки</a>';
@@ -21,9 +21,9 @@ function maxtarget_plugin_action_links($actions, $plugin_file) {
     return $actions;
 }
 
-add_filter('plugin_row_meta', 'maxtarget_plugin_description_links', 10, 4);
+add_filter('plugin_row_meta', 'mxtr_plugin_description_links', 10, 4);
 
-function maxtarget_plugin_description_links($meta, $plugin_file) {
+function mxtr_plugin_description_links($meta, $plugin_file) {
     if (false === strpos($plugin_file, basename(__FILE__)))
         return $meta;
     $meta[] = '<a href="options-general.php?page=maxtarget_settings">Настройки</a>';
@@ -36,7 +36,7 @@ if (is_admin()) {
     $options = get_option('maxtarget_options');
 
     if (is_bool($options)) {
-        maxtarget_set_default_options();
+        mxtr_set_default_options();
     }
 
     $url = get_site_url();
@@ -48,6 +48,7 @@ if (is_admin()) {
     else {
         $options = get_option('maxtarget_options');
     }
-    $my_settings_page = new maxTargetSettingsPage();
+
+    new MxTrSettingsPage();
 }
 
