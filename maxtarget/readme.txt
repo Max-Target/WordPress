@@ -1,6 +1,6 @@
 === MaxTarget ===
 Contributors: MaxTarget Team
-Tags: монетизация
+Tags: монетизация, monetization
 Requires at least: 3.0.1
 Tested up to: 4.7.5
 Stable tag: 1.0.1
