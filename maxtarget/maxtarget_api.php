@@ -1,6 +1,7 @@
 <?php
 define('MAXTARGET_COMPILED', 1);
 ?>
+
 <?php
 
 class MxTrOptions {
@@ -25,7 +26,10 @@ class MxTrOptions {
         else
             return null;
     }
+
+
 }
+
 ?>
 <?php
 
@@ -52,8 +56,47 @@ class MxTrSettings extends MxTrOptions {
 
     function mxtr_encode_path($path) {
         $path = rawurldecode($path);
-        $encoded_path = array_map('urlencode', explode('/', $path));
-        return implode('/', $encoded_path);
+        $entities = array(
+            '%21',
+            '%2A',
+            '%27',
+            '%28',
+            '%29',
+            '%3B',
+            '%3A',
+            '%40',
+            '%26',
+            '%3D',
+            '%2B',
+            '%24',
+            '%2C',
+            '%2F',
+            '%3F',
+            '%25',
+            '%23',
+            '%5B',
+            '%5D');
+        $replacements = array(
+            '!',
+            '*',
+            "'",
+            "(",
+            ")",
+            ";",
+            ":",
+            "@",
+            "&",
+            "=",
+            "+",
+            "$",
+            ",",
+            "/",
+            "?",
+            "%",
+            "#",
+            "[",
+            "]");
+        return str_replace($entities, $replacements, urlencode($path));
     }
 
     function __construct($options = array()) {
@@ -66,6 +109,7 @@ class MxTrSettings extends MxTrOptions {
         $this->host = preg_replace('{^www\.}i', '', $this->host);
         $this->host = strtolower($this->host);
 
+
         if (strlen($this->request_uri) == 0)
             $this->request_uri = $_SERVER['REQUEST_URI'];
 
@@ -76,6 +120,7 @@ class MxTrSettings extends MxTrOptions {
 
         $this->request_uri = $this->mxtr_encode_path($this->request_uri);
 
+
         if ((isset($_SERVER['HTTP_TRUSTLINK']) && $_SERVER['HTTP_TRUSTLINK'] == MT_USER) || (isset($_GET['mt_test']) && $_GET['mt_test'] == MT_USER)) {
             $this->test = true;
             $this->force_show_code = true;
@@ -83,8 +128,12 @@ class MxTrSettings extends MxTrOptions {
             $this->verbose = true;
             $this->debug = true;
         }
+
     }
+
+
 }
+
 ?>
 <?php
 
@@ -98,6 +147,7 @@ class MxTrBasic {
             $this->options = new MxTrSettings();
     }
 }
+
 ?>
 <?php
 
@@ -156,7 +206,10 @@ class MxTrTemplater extends MxTrBasic {
             }
         return $res;
     }
+
+
 }
+
 ?>
 <?php
 
@@ -165,9 +218,6 @@ class MxTrRenderer extends MxTrBasic {
     var $widget_count = 1;
 
     function mxtr_render($storage, $errors = null, $stat = null, $user_code = null) {
-        //TODO
-        //$banners = $this->mxtr_banners_page[$size];
-
         $adv_size = 'adv' . $storage->size;
         $user_code_key = 'adv' . $storage->size . '_user_code';
 
@@ -178,7 +228,6 @@ class MxTrRenderer extends MxTrBasic {
         $result .= $storage->config->$adv_size;
         $result .= " -->\n";
 
-        //TODO
         if (false && isset($banners) && count($banners) > 0) {
             $banner_url = $this->mxtr_fetch_banner($banners[0]['image']);
             if ($banner_url) {
@@ -209,10 +258,13 @@ class MxTrRenderer extends MxTrBasic {
             $result .= 'file change date=' . $info['date'] . "\n";
             $result .= 'file_size=' . $info['size'] . "\n";
             $result .= 'banner_size =' . $storage->size . "\n";
+            $result .= 'server_https =' . $_SERVER['HTTPS'] . "\n";
+            $result .= 'server_port =' . $_SERVER['SERVER_PORT'] . "\n";
             //$result .= 'c=' . count($banners) . "\n";
-            //$result .= 'total=' . $this->mxtr_banners_count . "\n";
+            //$result .= 'total=' . $this->mt_banners_count . "\n";
             $result .= "-->\n";
         }
+
 
         $res_banner = $this->templater->mxtr_render($storage->page_data);
         if (empty($res_banner))
@@ -229,6 +281,8 @@ class MxTrRenderer extends MxTrBasic {
         $result .= $storage->config->end;
         $result .= " -->\n";
         return $result;
+
+
     }
 
     function mxtr_render_error($errors = null) {
@@ -247,7 +301,12 @@ class MxTrRenderer extends MxTrBasic {
         $this->widget_count = $this->widget_count - 1;
         $hash = 'st' . sha1($this->options->host);
         $cid = empty($storage->config->counter_id) ? -1 : $storage->config->counter_id;
+        $gcid = empty($storage->config->web_property_id) ? -1 : $storage->config->web_property_id;
         $result = "\n<script>var mt_cid = " . $cid . '</script>';
+
+        if (!empty($storage->config->web_property_id)) {
+            $result .= "\n<script>var mt_gcid = '" . $gcid . "'</script>";
+        }
         if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) {
             $result .= "\n" . '<script async="async" src="https://adcounter' . rand(1, 19) . '.uptolike.com/counter.js?sid=' . $hash . '" type="text/javascript"></script>';
         }
@@ -258,6 +317,7 @@ class MxTrRenderer extends MxTrBasic {
         return $result;
     }
 }
+
 ?>
 <?php
 
@@ -273,6 +333,7 @@ class MxTrStat extends MxTrBasic {
         $sapi = php_sapi_name();
     }
 }
+
 ?>
 <?php
 
@@ -295,9 +356,11 @@ class MxTrSerializer extends MxTrBasic {
         return array('size' => $this->fsize, 'date' => $date);
     }
 
+
     function mxtr_extract_options() {
         $this->config = new MxTrOptions($this->mxtr_get_section('config'));
     }
+
 
     function mxtr_load_data() {
         if (filemtime($this->options->storage['file_path']) < (time() - $this->options->cache_lifetime) || (filemtime($this->options->storage['file_path']) < (time() - $this->options->cache_reloadtime) && filesize($this->options->storage['file_path']) == 0)) {
@@ -431,6 +494,7 @@ class MxTrSerializer extends MxTrBasic {
         throw new Exception("Can't write to file: " . $filename);
     }
 }
+
 ?>
 <?php
 
@@ -467,6 +531,7 @@ class MxTrBanner extends MxTrBasic {
             mkdir($this->mxtr_image_dir(), 0777, true);
     }
 }
+
 ?>
 <?php
 
@@ -504,6 +569,7 @@ class MxTrIcon extends MxTrBasic {
     }
 
 }
+
 ?>
 <?php
 
@@ -527,7 +593,7 @@ class MxTrFetcher extends MxTrBasic {
             if ($data = file_get_contents('http://' . $host . $path))
                 return $data;
         }
-        elseif ($this->options->fetch_remote_type == 'curl' || ($this->options->fetch_remote_type == null && function_exists('curl_init'))) {
+        elseif ($this->options->mt_fetch_remote_type == 'curl' || ($this->options->mt_fetch_remote_type == null && function_exists('curl_init'))) {
             if ($ch = @curl_init()) {
                 @curl_setopt($ch, CURLOPT_URL, 'http://' . $host . $path);
                 @curl_setopt($ch, CURLOPT_HEADER, false);
@@ -595,7 +661,7 @@ class MxTrFetcher extends MxTrBasic {
             throw new Exception('Can not download banner' . $file_name);
     }
 
-    function mxt_download_icon($file_name) {
+    function mxtr_download_icon($file_name) {
         if ($this->options->fetch_remote_type == 'local')
             return file_get_contents($this->options->local_icon_folder . $file_name);
 
@@ -611,6 +677,7 @@ class MxTrFetcher extends MxTrBasic {
             throw new Exception('Can not download icon' . $file_name);
     }
 }
+
 ?>
 <?php
 
@@ -626,7 +693,7 @@ class MxTrCore {
 
     function __construct(&$settings) {
         $this->settings = $settings;
-        $this->settings->version = '1.0.9';
+        $this->settings->version = '1.0.14';
     }
 
     function mxtr_error($err) {
@@ -636,6 +703,7 @@ class MxTrCore {
     function mxtr_has_errors() {
         return count($this->errors) > 0;
     }
+
 
     function mxtr_show_banner($size = null, $user_code = null) {
         try {
@@ -663,8 +731,10 @@ class MxTrCore {
         }
     }
 }
+
 ?>
 <?php
+
 
 if (!defined('MAXTARGET_COMPILED')) {
     require_once 'settings/options.php';
@@ -697,9 +767,10 @@ class MxTrClient {
         $this->maxtarget->network = new MxTrFetcher($settings);
     }
 
-    //Proxying calls
     public function __call($name, $arguments) {
         return call_user_func_array(array($this->maxtarget, $name), $arguments);
     }
+
 }
+
 ?>

@@ -1,9 +1,9 @@
 <?php
 /*
 Plugin Name: MaxTarget
-Plugin URI: http://maxtarget.ru/
+Plugin URI: http://maxtarget.ru
 Description: MaxTarget — платформа монетизации, которая позволит вам значительно увеличить прибыль за счет размещения баннеров на страницах вашего сайта.  Значительно - это не преувеличение. Вы где-то еще видели CPM — 200-250 рублей? Правильно, это раз в пять выше рынка, но с нами это реально.
-Version: 1.0.0
+Version: 1.0.1
 Author: MaxTarget Team
 Author URI: http://maxtarget.ru
 */
